@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>114. SIR</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:            #0b0e1a;
+    --bg-alt:        #0f1424;
+    --surface:       #141929;
+    --surface-2:     #1a2035;
+    --surface-3:     #202840;
+    --border:        #2a3356;
+    --border-glow:   #c8a84b;
+    --primary:       #c8a84b;
+    --primary-dim:   #a8893a;
+    --primary-light: #e8d07a;
+    --accent:        #2dd4a0;
+    --accent-dim:    #1aaa7e;
+    --error:         #e05a6a;
+    --error-bg:      rgba(224,90,106,0.12);
+    --success:       #2dd4a0;
+    --success-bg:    rgba(45,212,160,0.12);
+    --text:          #e8e4d8;
+    --text-dim:      #8a8fa8;
+    --text-muted:    #4a5070;
+    --glow-gold:     rgba(200,168,75,0.18);
+    --glow-teal:     rgba(45,212,160,0.15);
+    --radius:        12px;
+    --radius-lg:     18px;
+    --radius-full:   9999px;
+    --font-display:  'Cinzel', serif;
+    --font-body:     'Crimson Pro', serif;
+    --transition:    0.25s cubic-bezier(.4,0,.2,1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    min-height: 100dvh;
+    max-width: 480px;
+    margin: 0 auto;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Starfield background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(200,168,75,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 60% at 90% 80%, rgba(45,212,160,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── TYPOGRAPHY ─────────────────────── */
+  .display { font-family: var(--font-display); letter-spacing: .04em; }
+  .label-caps { font-family: var(--font-display); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
+
+  /* ── HEADER ──────────────────────────── */
+  header {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(11,14,26,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 18px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-logo {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 900;
+    color: var(--primary);
+    letter-spacing: .08em;
+    text-shadow: 0 0 20px rgba(200,168,75,0.5);
+  }
+  .header-logo span { color: var(--accent); font-size: 14px; margin-left: 2px; }
+  .combo-badge {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 12px;
+    background: rgba(200,168,75,0.1);
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius-full);
+    font-size: 12px; font-family: var(--font-display);
+    color: var(--primary-light);
+    box-shadow: 0 0 12px var(--glow-gold);
+  }
+  .lives { font-size: 15px; letter-spacing: .04em; }
+
+  /* ── SCREEN ROUTING ─────────────────── */
+  .screen { display: none; flex-direction: column; min-height: calc(100dvh - 60px - 60px); padding: 20px 18px 80px; position: relative; z-index: 1; }
+  .screen.active { display: flex; }
+
+  /* ── LOADING ────────────────────────── */
+  #loadingScreen {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: calc(100dvh - 120px);
+    gap: 20px;
+  }
+  .spinner {
+    width: 52px; height: 52px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-title { font-family: var(--font-display); font-size: 22px; color: var(--primary); text-shadow: 0 0 20px var(--glow-gold); }
+  .loading-sub { color: var(--text-dim); font-size: 14px; font-style: italic; }
+
+  /* ── HOME SCREEN ────────────────────── */
+  .hero-seal {
+    width: 120px; height: 120px;
+    margin: 20px auto 24px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    box-shadow: 0 0 40px var(--glow-gold), inset 0 0 40px rgba(200,168,75,0.05);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 42px; font-weight: 900;
+    color: var(--primary);
+    text-shadow: 0 0 24px rgba(200,168,75,0.7);
+    position: relative;
+    animation: sealPulse 4s infinite ease-in-out;
+  }
+  @keyframes sealPulse {
+    0%,100% { box-shadow: 0 0 40px var(--glow-gold), inset 0 0 40px rgba(200,168,75,0.05); }
+    50% { box-shadow: 0 0 70px rgba(200,168,75,0.35), inset 0 0 60px rgba(200,168,75,0.1); }
+  }
+  .hero-title { font-family: var(--font-display); font-size: 32px; font-weight: 900; color: var(--primary); text-align: center; letter-spacing: .1em; text-shadow: 0 0 24px var(--glow-gold); }
+  .hero-sub { color: var(--text-dim); text-align: center; font-style: italic; font-size: 15px; margin-top: 6px; }
+  .hero-divider { width: 60px; height: 1px; background: linear-gradient(to right, transparent, var(--primary), transparent); margin: 18px auto; }
+
+  .stat-row { display: flex; gap: 12px; margin: 4px 0 24px; }
+  .stat-card {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .stat-num { font-family: var(--font-display); font-size: 26px; color: var(--primary); }
+  .stat-lbl { font-size: 11px; color: var(--text-dim); margin-top: 2px; font-family: var(--font-display); letter-spacing: .1em; }
+
+  .mode-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    display: flex; align-items: center; gap: 16px;
+    cursor: pointer;
+    transition: all var(--transition);
+    margin-bottom: 12px;
+    position: relative; overflow: hidden;
+  }
+  .mode-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--glow-gold) 0%, transparent 60%);
+    opacity: 0; transition: opacity var(--transition);
+  }
+  .mode-card:hover::before, .mode-card:active::before { opacity: 1; }
+  .mode-card:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: 0 8px 30px rgba(200,168,75,0.15); }
+  .mode-icon {
+    width: 48px; height: 48px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .mode-icon.gold { background: rgba(200,168,75,0.12); color: var(--primary); border: 1px solid rgba(200,168,75,0.3); }
+  .mode-icon.teal { background: rgba(45,212,160,0.10); color: var(--accent); border: 1px solid rgba(45,212,160,0.25); }
+  .mode-title { font-family: var(--font-display); font-size: 15px; color: var(--text); font-weight: 600; letter-spacing: .05em; }
+  .mode-desc { font-size: 13px; color: var(--text-dim); margin-top: 2px; font-style: italic; }
+
+  /* ── TRAINING SCREEN ─────────────────── */
+  .training-progress { display: flex; gap: 2px; margin-bottom: 20px; }
+  .progress-pip {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: var(--border);
+    transition: background .4s;
+  }
+  .progress-pip.done { background: var(--accent); }
+  .progress-pip.current { background: var(--primary); }
+
+  .flashcard-wrap { perspective: 1000px; width: 100%; margin-bottom: 20px; }
+  .flashcard {
+    width: 100%; min-height: 230px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+    border-radius: var(--radius-lg);
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    gap: 10px;
+  }
+  .card-front {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.4), inset 0 0 30px var(--glow-gold);
+  }
+  .card-back {
+    background: var(--surface-3);
+    border: 1px solid var(--accent-dim);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.4), inset 0 0 30px var(--glow-teal);
+    transform: rotateY(180deg);
+  }
+  .card-surah-id { font-family: var(--font-display); font-size: 13px; color: var(--text-dim); letter-spacing: .14em; }
+  .card-surah-name { font-family: var(--font-display); font-size: 36px; font-weight: 900; color: var(--primary); text-shadow: 0 0 20px var(--glow-gold); text-align: center; }
+  .card-hint { font-size: 12px; color: var(--text-muted); font-style: italic; margin-top: 8px; }
+  .card-back-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+  .back-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(45,212,160,0.1); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 18px; flex-shrink: 0; border: 1px solid rgba(45,212,160,0.2); }
+  .back-label { font-family: var(--font-display); font-size: 10px; color: var(--text-muted); letter-spacing: .12em; }
+  .back-value { font-size: 16px; color: var(--text); font-weight: 600; }
+  .back-meaning { text-align: center; font-style: italic; font-size: 18px; color: var(--primary-light); margin-top: 8px; width: 100%; }
+
+  .card-actions { display: flex; gap: 10px; width: 100%; }
+  .btn { border: none; cursor: pointer; border-radius: var(--radius); font-family: var(--font-display); font-size: 13px; letter-spacing: .08em; padding: 13px 0; flex: 1; transition: all var(--transition); font-weight: 600; }
+  .btn-danger { background: var(--error-bg); color: var(--error); border: 1px solid rgba(224,90,106,0.3); }
+  .btn-danger:hover { background: rgba(224,90,106,0.2); transform: translateY(-1px); }
+  .btn-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(45,212,160,0.3); }
+  .btn-success:hover { background: rgba(45,212,160,0.2); transform: translateY(-1px); }
+  .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dim)); color: #0b0e1a; border: none; box-shadow: 0 4px 20px rgba(200,168,75,0.3); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(200,168,75,0.4); }
+
+  .training-info {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px; color: var(--text-dim);
+    text-align: center;
+    font-style: italic;
+  }
+  .training-complete {
+    text-align: center; padding: 40px 20px; display: none; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .tc-seal { font-size: 64px; }
+  .tc-title { font-family: var(--font-display); font-size: 24px; color: var(--primary); text-shadow: 0 0 20px var(--glow-gold); }
+  .tc-sub { font-size: 15px; color: var(--text-dim); font-style: italic; }
+
+  /* ── CHALLENGE SCREEN ────────────────── */
+  .timer-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
+  .timer-ring { position: relative; width: 110px; height: 110px; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-path { stroke-dasharray: 282.7; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke .3s; }
+  .timer-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .timer-num { font-family: var(--font-display); font-size: 28px; color: var(--primary); font-weight: 700; }
+  .timer-lbl { font-size: 9px; color: var(--text-muted); letter-spacing: .12em; font-family: var(--font-display); }
+
+  .challenge-score-row { display: flex; gap: 12px; margin-bottom: 16px; }
+  .score-pill {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 0; text-align: center;
+  }
+  .score-num { font-family: var(--font-display); font-size: 22px; color: var(--primary); }
+  .score-lbl { font-size: 10px; color: var(--text-muted); letter-spacing: .1em; font-family: var(--font-display); }
+
+  .question-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    margin-bottom: 16px;
+    text-align: center;
+    box-shadow: inset 0 0 30px var(--glow-gold);
+  }
+  .q-badge { display: inline-block; font-family: var(--font-display); font-size: 10px; letter-spacing: .14em; color: var(--primary-light); background: rgba(200,168,75,0.1); border: 1px solid rgba(200,168,75,0.25); padding: 3px 12px; border-radius: var(--radius-full); margin-bottom: 14px; }
+  .q-text { font-family: var(--font-display); font-size: 19px; color: var(--text); line-height: 1.5; }
+  .q-text em { color: var(--primary); font-style: normal; }
+
+  .answer-btn {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer; transition: all var(--transition);
+    margin-bottom: 10px; color: var(--text);
+  }
+  .answer-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(200,168,75,0.05); transform: translateX(2px); }
+  .answer-btn:disabled { cursor: default; }
+  .answer-btn.correct { background: var(--success-bg); border-color: var(--accent); box-shadow: 0 0 18px var(--glow-teal); }
+  .answer-btn.wrong { background: var(--error-bg); border-color: var(--error); }
+  .answer-ltr {
+    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    background: var(--surface-3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 13px; color: var(--primary);
+    font-weight: 700; transition: all var(--transition);
+  }
+  .answer-btn.correct .answer-ltr { background: var(--accent); color: #0b0e1a; border-color: var(--accent); }
+  .answer-btn.wrong .answer-ltr { background: var(--error); color: white; border-color: var(--error); }
+  .answer-text { font-family: var(--font-display); font-size: 15px; letter-spacing: .04em; }
+
+  /* Result overlay */
+  .result-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(11,14,26,0.95);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 18px;
+    padding: 30px;
+    display: none;
+  }
+  .result-overlay.show { display: flex; }
+  .result-emoji { font-size: 72px; animation: bounceIn .5s; }
+  @keyframes bounceIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  .result-title { font-family: var(--font-display); font-size: 30px; color: var(--primary); text-shadow: 0 0 24px var(--glow-gold); }
+  .result-score { font-family: var(--font-display); font-size: 52px; font-weight: 900; color: var(--primary-light); }
+  .result-sub { font-size: 15px; color: var(--text-dim); font-style: italic; text-align: center; }
+  .result-stats { display: flex; gap: 16px; }
+  .result-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 20px; text-align: center; }
+
+  /* ── BOTTOM NAV ──────────────────────── */
+  nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    display: flex; justify-content: space-around; align-items: center;
+    height: 60px; padding: 0 10px;
+    background: rgba(11,14,26,0.92);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    z-index: 50;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    cursor: pointer; padding: 6px 12px; border-radius: var(--radius);
+    transition: all var(--transition); color: var(--text-muted);
+    border: none; background: transparent;
+    font-family: var(--font-display); font-size: 9px; letter-spacing: .1em;
+  }
+  .nav-item .material-symbols-outlined { font-size: 22px; }
+  .nav-item.active { color: var(--primary); }
+  .nav-item:hover { color: var(--primary-dim); }
+
+  /* ── MISC ────────────────────────────── */
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .section-title { font-family: var(--font-display); font-size: 13px; letter-spacing: .14em; color: var(--text-muted); margin-bottom: 14px; text-transform: uppercase; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-6px); }
+    40%,80% { transform: translateX(6px); }
+  }
+  .shake { animation: shake .4s ease; }
+  @keyframes pop {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  .pop { animation: pop .35s ease; }
+
+  /* scroll */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ───────────────────────────────── -->
+<header>
+  <div class="header-logo">114<span>✦</span> SIR</div>
+  <div class="combo-badge" id="comboBadge" style="display:none">
+    <span id="comboCount">0x</span>
+    <span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1;">local_fire_department</span>
+  </div>
+  <div class="lives" id="livesDisplay">❤️❤️❤️</div>
+</header>
+
+<!-- ── LOADING ──────────────────────────────── -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-title">114. SIR</div>
+  <div class="loading-sub">Sırlar yükleniyor…</div>
+</div>
+
+<!-- ── HOME SCREEN ──────────────────────────── -->
+<div class="screen" id="homeScreen">
+  <div class="hero-seal">☽</div>
+  <div class="hero-title">114. SIR</div>
+  <div class="hero-sub">Kur'an Surelerinin Derin Sırrına Yolculuk</div>
+  <div class="hero-divider"></div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">114</div>
+      <div class="stat-lbl">Toplam Sure</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statLearned">0</div>
+      <div class="stat-lbl">Öğrenilen</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statBest">0</div>
+      <div class="stat-lbl">En Yüksek</div>
+    </div>
+  </div>
+
+  <div class="section-title">Mod Seç</div>
+
+  <div class="mode-card" onclick="showScreen('trainingScreen'); initTraining()">
+    <div class="mode-icon gold">
+      <span class="material-symbols-outlined">style</span>
+    </div>
+    <div>
+      <div class="mode-title">Antrenman</div>
+      <div class="mode-desc">Kartları çevir, sırları keşfet</div>
+    </div>
+    <span class="material-symbols-outlined" style="margin-left:auto;color:var(--text-muted)">chevron_right</span>
+  </div>
+
+  <div class="mode-card" onclick="showScreen('challengeScreen'); startChallenge()">
+    <div class="mode-icon teal">
+      <span class="material-symbols-outlined">timer</span>
+    </div>
+    <div>
+      <div class="mode-title">60 Saniyelik Meydan Okuma</div>
+      <div class="mode-desc">Sınırı zorla, komboyu yükselt</div>
+    </div>
+    <span class="material-symbols-outlined" style="margin-left:auto;color:var(--text-muted)">chevron_right</span>
+  </div>
+</div>
+
+<!-- ── TRAINING SCREEN ──────────────────────── -->
+<div class="screen" id="trainingScreen">
+  <div class="training-progress" id="trainingProgress"></div>
+
+  <div class="flashcard-wrap" onclick="flipCard()">
+    <div class="flashcard" id="flashcard">
+      <div class="card-face card-front" id="cardFront">
+        <div class="card-surah-id" id="cardId">SURE #001</div>
+        <div class="card-surah-name" id="cardName">—</div>
+        <div class="card-hint">Kartı çevirmek için dokun ✦</div>
+      </div>
+      <div class="card-face card-back" id="cardBack">
+        <div class="card-back-row">
+          <div class="back-icon"><span class="material-symbols-outlined" style="font-size:18px">location_on</span></div>
+          <div>
+            <div class="back-label">Nüzul Yeri</div>
+            <div class="back-value" id="backLocation">—</div>
+          </div>
+        </div>
+        <div class="card-back-row">
+          <div class="back-icon"><span class="material-symbols-outlined" style="font-size:18px">format_list_numbered</span></div>
+          <div>
+            <div class="back-label">Ayet Sayısı</div>
+            <div class="back-value" id="backAyahs">—</div>
+          </div>
+        </div>
+        <div class="back-meaning" id="backMeaning">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-actions" id="cardActions" style="display:none">
+    <button class="btn btn-danger" onclick="handleTraining(false)">
+      <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px">refresh</span>Tekrar Et
+    </button>
+    <button class="btn btn-success" onclick="handleTraining(true)">
+      <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;margin-right:4px">check</span>Öğrendim
+    </button>
+  </div>
+
+  <div class="training-info" id="trainingInfo">Kartı çevir, ardından kendinle dürüst ol.</div>
+
+  <div class="training-complete" id="trainingComplete">
+    <div class="tc-seal">✦</div>
+    <div class="tc-title">Tebrikler!</div>
+    <div class="tc-sub">Tüm sureleri tamamladın.<br>Antrenman sıfırlandı.</div>
+    <button class="btn btn-primary" style="max-width:200px;margin-top:10px" onclick="resetTraining()">Yeniden Başla</button>
+  </div>
+</div>
+
+<!-- ── CHALLENGE SCREEN ─────────────────────── -->
+<div class="screen" id="challengeScreen">
+  <div class="challenge-score-row">
+    <div class="score-pill">
+      <div class="score-num" id="challengeScore">0</div>
+      <div class="score-lbl">Puan</div>
+    </div>
+    <div class="score-pill">
+      <div class="score-num" id="challengeStreak">0</div>
+      <div class="score-lbl">Seri</div>
+    </div>
+    <div class="score-pill">
+      <div class="score-num" id="challengeCorrect">0</div>
+      <div class="score-lbl">Doğru</div>
+    </div>
+  </div>
+
+  <div class="timer-wrap">
+    <div class="timer-ring">
+      <svg width="110" height="110" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#1a2035" stroke-width="8"/>
+        <circle class="timer-path" id="timerCircle" cx="50" cy="50" r="45" fill="none" stroke="#c8a84b" stroke-linecap="round" stroke-width="8"/>
+      </svg>
+      <div class="timer-inner">
+        <div class="timer-num" id="countdownText">60</div>
+        <div class="timer-lbl">SANIYE</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-badge" id="questionNum">SORU #1</div>
+    <div class="q-text" id="questionText">Sorular yükleniyor…</div>
+  </div>
+
+  <div id="answerContainer"></div>
+</div>
+
+<!-- ── RESULT OVERLAY ───────────────────────── -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-emoji" id="resultEmoji">🏆</div>
+  <div class="result-title">Süre Doldu!</div>
+  <div class="result-score" id="resultScore">0</div>
+  <div class="result-sub">Puan kazandın</div>
+  <div class="result-stats">
+    <div class="result-stat">
+      <div class="score-num" id="resultCorrect">0</div>
+      <div class="score-lbl">Doğru</div>
+    </div>
+    <div class="result-stat">
+      <div class="score-num" id="resultWrong">0</div>
+      <div class="score-lbl">Yanlış</div>
+    </div>
+    <div class="result-stat">
+      <div class="score-num" id="resultBest">0</div>
+      <div class="score-lbl">En Yüksek</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" style="width:220px;margin-top:8px" onclick="closeResult()">Tekrar Oyna</button>
+  <button class="btn btn-danger" style="width:220px" onclick="closeResultHome()">Ana Menü</button>
+</div>
+
+<!-- ── BOTTOM NAV ───────────────────────────── -->
+<nav>
+  <button class="nav-item active" id="navHome" onclick="showScreen('homeScreen')">
+    <span class="material-symbols-outlined">home</span>
+    Ana Sayfa
+  </button>
+  <button class="nav-item" id="navTraining" onclick="showScreen('trainingScreen'); initTraining()">
+    <span class="material-symbols-outlined">style</span>
+    Antrenman
+  </button>
+  <button class="nav-item" id="navChallenge" onclick="showScreen('challengeScreen'); startChallenge()">
+    <span class="material-symbols-outlined">timer</span>
+    Meydan
+  </button>
+</nav>
+
+<!-- ── JAVASCRIPT ───────────────────────────── -->
+<script>
+// ── STATE ─────────────────────────────────────
+let surahData = [];
+let learnedIds = new Set(JSON.parse(localStorage.getItem('learnedIds') || '[]'));
+let bestScore   = parseInt(localStorage.getItem('bestScore') || '0');
+
+// Training state
+let trainingQueue   = [];
+let trainingIndex   = 0;
+let cardFlipped     = false;
+
+// Challenge state
+let challengeTimer  = null;
+let timeLeft        = 60;
+let challengeScore  = 0;
+let challengeStreak = 0;
+let challengeCorrectCount = 0;
+let challengeWrongCount   = 0;
+let questionCount   = 0;
+let answering       = false;
+let lives           = 3;
+
+const DURATION = 60;
+const circumference = 2 * Math.PI * 45;
+
+// ── FETCH DATA ────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/suleymancetinx/114.SIR/refs/heads/main/data.json');
+    if (!res.ok) throw new Error('Ağ hatası');
+    surahData = await res.json();
+  } catch (e) {
+    console.error('Veri çekme hatası:', e);
+    // Fallback: ilk 10 sure ile demo
+    surahData = [
+      {"id":1,"name":"Fatiha","location":"Mekke","ayahs":7,"meaning":"Açılış, başlangıç"},
+      {"id":2,"name":"Bakara","location":"Medine","ayahs":286,"meaning":"İnek"},
+      {"id":3,"name":"Al-i İmran","location":"Medine","ayahs":200,"meaning":"İmran ailesi"},
+      {"id":4,"name":"Nisa","location":"Medine","ayahs":176,"meaning":"Kadınlar"},
+      {"id":5,"name":"Maide","location":"Medine","ayahs":120,"meaning":"Sofra"},
+      {"id":6,"name":"Enam","location":"Mekke","ayahs":165,"meaning":"Hayvanlar"},
+      {"id":7,"name":"Araf","location":"Mekke","ayahs":206,"meaning":"Yüksek yerler"},
+      {"id":8,"name":"Enfal","location":"Medine","ayahs":75,"meaning":"Ganimetler"},
+      {"id":9,"name":"Tevbe","location":"Medine","ayahs":129,"meaning":"Tövbe"},
+      {"id":10,"name":"Yunus","location":"Mekke","ayahs":109,"meaning":"Hz. Yunus"}
+    ];
+  }
+
+  document.getElementById('loadingScreen').style.display = 'none';
+  updateHomeStats();
+  showScreen('homeScreen');
+});
+
+// ── SCREEN ROUTING ────────────────────────────
+const screens = ['homeScreen','trainingScreen','challengeScreen'];
+const navIds  = ['navHome','navTraining','navChallenge'];
+
+function showScreen(id) {
+  // Stop challenge timer when leaving
+  if (id !== 'challengeScreen') stopTimer();
+
+  screens.forEach((s, i) => {
+    document.getElementById(s).classList.toggle('active', s === id);
+    document.getElementById(navIds[i]).classList.toggle('active', navIds[i] === 'nav' + id.replace('Screen','').charAt(0).toUpperCase() + id.replace('Screen','').slice(1));
+  });
+  // Sync active nav
+  navIds.forEach(n => document.getElementById(n).classList.remove('active'));
+  const map = {homeScreen:'navHome', trainingScreen:'navTraining', challengeScreen:'navChallenge'};
+  if (map[id]) document.getElementById(map[id]).classList.add('active');
+}
+
+// ── HOME STATS ────────────────────────────────
+function updateHomeStats() {
+  document.getElementById('statLearned').textContent = learnedIds.size;
+  document.getElementById('statBest').textContent    = bestScore;
+}
+
+// ── TRAINING ──────────────────────────────────
+function initTraining() {
+  if (!surahData.length) return;
+
+  // Build queue: not-yet-learned surahs, shuffle
+  const remaining = surahData.filter(s => !learnedIds.has(s.id));
+  trainingQueue   = remaining.length ? shuffle([...remaining]) : shuffle([...surahData]);
+  trainingIndex   = 0;
+
+  buildProgressPips();
+  document.getElementById('trainingComplete').style.display = 'none';
+  document.getElementById('flashcard').parentElement.style.display = '';
+  document.getElementById('cardActions').style.display = 'none';
+  document.getElementById('trainingInfo').style.display = '';
+  renderCard();
+}
+
+function buildProgressPips() {
+  const el = document.getElementById('trainingProgress');
+  el.innerHTML = '';
+  const total = Math.min(trainingQueue.length, 30);
+  for (let i = 0; i < total; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'progress-pip' + (i === 0 ? ' current' : '');
+    pip.id = 'pip' + i;
+    el.appendChild(pip);
+  }
+}
+
+function renderCard() {
+  if (trainingIndex >= trainingQueue.length) {
+    showTrainingComplete();
+    return;
+  }
+
+  const s = trainingQueue[trainingIndex];
+  cardFlipped = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('cardId').textContent   = `SURE #${String(s.id).padStart(3,'0')}`;
+  document.getElementById('cardName').textContent  = s.name;
+  document.getElementById('backLocation').textContent = s.location;
+  document.getElementById('backAyahs').textContent    = s.ayahs + ' ayet';
+  document.getElementById('backMeaning').textContent  = '"' + s.meaning + '"';
+  document.getElementById('cardActions').style.display = 'none';
+  document.getElementById('trainingInfo').textContent = `Kalan: ${trainingQueue.length - trainingIndex} sure`;
+
+  // Progress pips
+  const maxPips = Math.min(trainingQueue.length, 30);
+  for (let i = 0; i < maxPips; i++) {
+    const pip = document.getElementById('pip' + i);
+    if (!pip) continue;
+    pip.className = 'progress-pip' + (i < trainingIndex ? ' done' : i === trainingIndex ? ' current' : '');
+  }
+}
+
+function flipCard() {
+  if (trainingIndex >= trainingQueue.length) return;
+  cardFlipped = !cardFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped', cardFlipped);
+  if (cardFlipped) {
+    document.getElementById('cardActions').style.display = 'flex';
+    document.getElementById('trainingInfo').style.display = 'none';
+  } else {
+    document.getElementById('cardActions').style.display = 'none';
+    document.getElementById('trainingInfo').style.display = '';
+  }
+}
+
+function handleTraining(learned) {
+  const s = trainingQueue[trainingIndex];
+  if (learned) {
+    learnedIds.add(s.id);
+    localStorage.setItem('learnedIds', JSON.stringify([...learnedIds]));
+    updateHomeStats();
+  } else {
+    // Put back at a random later position
+    trainingQueue.splice(trainingIndex + 1 + Math.floor(Math.random() * (trainingQueue.length - trainingIndex)), 0, s);
+  }
+  trainingIndex++;
+  renderCard();
+}
+
+function showTrainingComplete() {
+  document.getElementById('flashcard').parentElement.style.display = 'none';
+  document.getElementById('cardActions').style.display = 'none';
+  document.getElementById('trainingInfo').style.display = 'none';
+  document.getElementById('trainingProgress').innerHTML = '';
+  const tc = document.getElementById('trainingComplete');
+  tc.style.display = 'flex';
+}
+
+function resetTraining() {
+  learnedIds.clear();
+  localStorage.setItem('learnedIds', '[]');
+  updateHomeStats();
+  document.getElementById('flashcard').parentElement.style.display = '';
+  initTraining();
+}
+
+// ── CHALLENGE ─────────────────────────────────
+function startChallenge() {
+  if (!surahData.length) return;
+  stopTimer();
+  timeLeft            = DURATION;
+  challengeScore      = 0;
+  challengeStreak     = 0;
+  challengeCorrectCount = 0;
+  challengeWrongCount   = 0;
+  questionCount       = 0;
+  lives               = 3;
+  answering           = false;
+  updateLivesDisplay();
+  updateChallengeUI();
+  document.getElementById('comboBadge').style.display = 'none';
+  renderQuestion();
+  startTimer();
+}
+
+function startTimer() {
+  const circle = document.getElementById('timerCircle');
+  circle.style.strokeDasharray = circumference;
+  updateTimerDisplay();
+  challengeTimer = setInterval(() => {
+    if (timeLeft > 0) {
+      timeLeft--;
+      updateTimerDisplay();
+    } else {
+      stopTimer();
+      showResult();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (challengeTimer) { clearInterval(challengeTimer); challengeTimer = null; }
+}
+
+function updateTimerDisplay() {
+  const circle = document.getElementById('timerCircle');
+  const pct    = timeLeft / DURATION;
+  circle.style.strokeDashoffset = circumference * (1 - pct);
+  document.getElementById('countdownText').textContent = timeLeft;
+
+  if (timeLeft <= 10) {
+    circle.style.stroke = '#e05a6a';
+    document.getElementById('countdownText').style.color = '#e05a6a';
+  } else if (timeLeft <= 30) {
+    circle.style.stroke = '#e8d07a';
+    document.getElementById('countdownText').style.color = '#e8d07a';
+  } else {
+    circle.style.stroke = '#c8a84b';
+    document.getElementById('countdownText').style.color = '#c8a84b';
+  }
+}
+
+// Question types
+const questionTypes = [
+  {
+    question: (s) => `Ayet sayısı <em>${s.ayahs}</em> olan sure hangisidir?`,
+    correct:  (s) => s.name,
+    wrong:    (s, pool) => pool.filter(x => x.id !== s.id && x.ayahs !== s.ayahs).map(x => x.name)
+  },
+  {
+    question: (s) => `Anlamı "<em>${s.meaning}</em>" olan sure hangisidir?`,
+    correct:  (s) => s.name,
+    wrong:    (s, pool) => pool.filter(x => x.id !== s.id && x.meaning !== s.meaning).map(x => x.name)
+  },
+  {
+    question: (s) => `<em>${s.name}</em> suresinin ayet sayısı kaçtır?`,
+    correct:  (s) => String(s.ayahs),
+    wrong:    (s, pool) => pool.filter(x => x.ayahs !== s.ayahs).map(x => String(x.ayahs))
+  },
+  {
+    question: (s) => `<em>${s.name}</em> suresi nerede nazil olmuştur?`,
+    correct:  (s) => s.location,
+    wrong:    (s, pool) => pool.filter(x => x.location !== s.location).map(x => x.location)
+  },
+  {
+    question: (s) => `<em>${s.name}</em> suresinin anlamı nedir?`,
+    correct:  (s) => s.meaning,
+    wrong:    (s, pool) => pool.filter(x => x.id !== s.id && x.meaning !== s.meaning).map(x => x.meaning)
+  }
+];
+
+function renderQuestion() {
+  if (!surahData.length) return;
+  questionCount++;
+
+  const surah    = surahData[Math.floor(Math.random() * surahData.length)];
+  const type     = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+  const correctAns = type.correct(surah);
+  const wrongPool  = type.wrong(surah, surahData);
+  const wrongOpts  = shuffle(wrongPool).slice(0, 3);
+
+  // Make sure we have 3 wrong options
+  while (wrongOpts.length < 3) wrongOpts.push('—');
+
+  const options = shuffle([correctAns, ...wrongOpts]);
+  const letters = ['A','B','C','D'];
+
+  document.getElementById('questionNum').textContent = `SORU #${questionCount}`;
+  document.getElementById('questionText').innerHTML  = type.question(surah);
+
+  const container = document.getElementById('answerContainer');
+  container.innerHTML = '';
+  options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<div class="answer-ltr">${letters[i]}</div><div class="answer-text">${opt}</div>`;
+    btn.dataset.correct = (opt === correctAns).toString();
+    btn.onclick = () => handleAnswer(btn, opt === correctAns);
+    container.appendChild(btn);
+  });
+
+  answering = false;
+}
+
+function handleAnswer(btn, isCorrect) {
+  if (answering) return;
+  answering = true;
+
+  const allBtns = document.querySelectorAll('.answer-btn');
+  allBtns.forEach(b => { b.disabled = true; });
+
+  if (isCorrect) {
+    btn.classList.add('correct', 'pop');
+    challengeStreak++;
+    const bonus = Math.floor(challengeStreak / 3);
+    challengeScore += 10 + bonus * 5;
+    challengeCorrectCount++;
+    // combo badge
+    if (challengeStreak >= 3) {
+      document.getElementById('comboBadge').style.display = 'flex';
+      document.getElementById('comboCount').textContent = challengeStreak + 'x';
+    }
+  } else {
+    btn.classList.add('wrong', 'shake');
+    challengeStreak = 0;
+    challengeWrongCount++;
+    lives = Math.max(0, lives - 1);
+    updateLivesDisplay();
+    document.getElementById('comboBadge').style.display = 'none';
+    // Highlight correct
+    allBtns.forEach(b => { if (b.dataset.correct === 'true') b.classList.add('correct'); });
+    if (lives === 0) {
+      setTimeout(() => { stopTimer(); showResult(); }, 800);
+      return;
+    }
+  }
+
+  updateChallengeUI();
+  setTimeout(renderQuestion, 900);
+}
+
+function updateChallengeUI() {
+  document.getElementById('challengeScore').textContent  = challengeScore;
+  document.getElementById('challengeStreak').textContent = challengeStreak;
+  document.getElementById('challengeCorrect').textContent = challengeCorrectCount;
+}
+
+function updateLivesDisplay() {
+  const h = document.getElementById('livesDisplay');
+  h.textContent = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+}
+
+// ── RESULT ────────────────────────────────────
+function showResult() {
+  if (challengeScore > bestScore) {
+    bestScore = challengeScore;
+    localStorage.setItem('bestScore', bestScore);
+  }
+  updateHomeStats();
+
+  document.getElementById('resultScore').textContent   = challengeScore;
+  document.getElementById('resultCorrect').textContent = challengeCorrectCount;
+  document.getElementById('resultWrong').textContent   = challengeWrongCount;
+  document.getElementById('resultBest').textContent    = bestScore;
+  document.getElementById('resultEmoji').textContent   = challengeScore >= 100 ? '🏆' : challengeScore >= 50 ? '⭐' : '📖';
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('show');
+  startChallenge();
+}
+
+function closeResultHome() {
+  document.getElementById('resultOverlay').classList.remove('show');
+  showScreen('homeScreen');
+}
+
+// ── UTILS ─────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
