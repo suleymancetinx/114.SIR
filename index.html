@@ -433,8 +433,8 @@ header{position:sticky;top:0;z-index:40;background:rgba(11,14,26,.9);backdrop-fi
 
 <nav>
   <button class="ni on" id="nHome" onclick="goHome()"><span class="ms">home</span>Ana Sayfa</button>
-  <button class="ni" id="nTrain" onclick="goTrain()"><span class="ms">style</span>Antrenman</button>
-  <button class="ni" id="nChal" onclick="goChallenge()"><span class="ms">timer</span>Meydan</button>
+  <button class="ni" id="nTrain" onclick="goTrain()"><span class="ms">style</span>Antrenman Yap</button>
+  <button class="ni" id="nChal" onclick="goChallenge()"><span class="ms">timer</span>Meydan Oku</button>
 </nav>
 
 <script>
@@ -576,7 +576,7 @@ let activeGrpIdx=-1, tQueue=[], tIdx=0, flipped=false;
 // Challenge
 let timer=null, tLeft=60, score=0, streak=0, rightN=0, wrongN=0, qN=0, busy=false, lives=3;
 let lvl=1, lvlRight=0;
-const LVLSZ=10, DUR=60, CIRC=2*Math.PI*45;
+const LVLSZ=10, DUR=180, CIRC=2*Math.PI*45;
 
 // ══════════════════════════════════════════
 //  SCREEN ROUTING
