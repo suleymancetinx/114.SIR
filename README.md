@@ -45,7 +45,7 @@ Oyun tamamen istemci tarafında (client-side) çalışır ve gücünü dışarı
 
 2. Proje dizinine gidin.
 3. CORS hatalarını önlemek için `index.html` dosyasını bir yerel sunucu (Örn: VS Code Live Server eklentisi) ile çalıştırın.
-```
+
 ---
 👨‍💻 Geliştirici ve İletişim
 Süleyman Çetin | Yazılım Geliştirici & Tasarımcı Topluma faydalı, açık kaynaklı dijital araçlar geliştirmeyi misyon edinmiştir.
