@@ -47,20 +47,19 @@ Oyun tamamen istemci tarafında (client-side) çalışır ve gücünü dışarı
 3. CORS hatalarını önlemek için `index.html` dosyasını bir yerel sunucu (Örn: VS Code Live Server eklentisi) ile çalıştırın.
 
 ---
-👨‍💻 Geliştirici ve İletişim
-Süleyman Çetin | Yazılım Geliştirici & Tasarımcı Topluma faydalı, açık kaynaklı dijital araçlar geliştirmeyi misyon edinmiştir.
 
-GitHub: github.com/suleymancetinx
+## 👨‍💻 Geliştirici ve İletişim
 
-LinkedIn: linkedin.com/in/suleymancetinx
+**Süleyman Çetin** | *Yazılım Geliştirici & Tasarımcı* Topluma faydalı, açık kaynaklı dijital araçlar geliştirmeyi misyon edinmiştir.
 
-X (Twitter): @suleymancetinx
-
-Bu proje MIT lisansı ile açık kaynaklı olarak sunulmaktadır. Emeğini ve zamanını topluma bağışlayan gönüllüler için sevgiyle yapılmıştır. ❤️
+* **GitHub:** [github.com/suleymancetinx](https://github.com/suleymancetinx)
+* **LinkedIn:** [linkedin.com/in/suleymancetinx](https://www.google.com/search?q=https://linkedin.com/in/suleymancetinx)
+* **X (Twitter):** [@suleymancetinx](https://www.google.com/search?q=https://twitter.com/suleymancetinx)
 
 ---
 
-*Bu proje MIT lisansı ile açık kaynaklı olarak sunulmaktadır.
-Emeğini ve zamanını topluma bağışlayan gönüllüler için sevgiyle yapılmıştır.* ❤️
+*Bu proje MIT lisansı ile açık kaynaklı olarak sunulmaktadır. Emeğini ve zamanını topluma bağışlayan gönüllüler için sevgiyle yapılmıştır.* ❤️
 
+```
 
+```
