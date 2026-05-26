@@ -43,11 +43,9 @@ Oyun tamamen istemci tarafında (client-side) çalışır ve gücünü dışarı
    ```bash
    git clone [https://github.com/suleymancetinx/114.SIR.git](https://github.com/suleymancetinx/114.SIR.git)
 
-```
-
 2. Proje dizinine gidin.
 3. CORS hatalarını önlemek için `index.html` dosyasını bir yerel sunucu (Örn: VS Code Live Server eklentisi) ile çalıştırın.
-
+```
 ---
 
 ## 👨‍💻 Geliştirici ve İletişim
@@ -60,8 +58,7 @@ Oyun tamamen istemci tarafında (client-side) çalışır ve gücünü dışarı
 
 ---
 
-*Bu proje MIT lisansı ile açık kaynaklı olarak sunulmaktadır. Emeğini ve zamanını topluma bağışlayan gönüllüler için sevgiyle yapılmıştır.* ❤️
+*Bu proje MIT lisansı ile açık kaynaklı olarak sunulmaktadır.
+Emeğini ve zamanını topluma bağışlayan gönüllüler için sevgiyle yapılmıştır.* ❤️
 
-```
 
-```
