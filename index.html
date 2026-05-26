@@ -1056,7 +1056,7 @@ function processAns(ok,isCombo,btn){
     if(btn) btn.classList.add('ok','pop');
     streak++; score+=10+Math.floor(streak/3)*5; rightN++; lvlRight++;
     if(isCombo){
-      doBoom(); tLeft=Math.min(tLeft+5,99); showToast();
+      doBoom(); tLeft=Math.min(tLeft+5,DUR); showToast();
     }
     if(streak>=3){
       document.getElementById('comboBadge').style.display='flex';
