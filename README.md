@@ -2,6 +2,8 @@
 
 **[🎮 Oyunu Hemen Oyna (Canlı Demo)](https://suleymancetinx.github.io/114.SIR/)**
 
+[![114. SIR Uygulama Ekran Görüntüsü](114.sir.png)](https://suleymancetinx.github.io/114.SIR/)
+
 ## 114. SIR Nedir?
 **114. SIR**, Kur'an-ı Kerim'in 114 sure ismini sırasıyla ezberlemeyi ve surelerin anlamlarını, nüzul yerlerini (Mekkî/Medenî) ve ayet sayılarını öğrenmeyi kolaylaştıran interaktif bir mobil web uygulamasıdır. 
 
