@@ -58,7 +58,8 @@ Oyun tamamen istemci tarafında (client-side) çalışır ve gücünü dışarı
 
 ---
 
-*Bu proje MIT lisansı ile açık kaynaklı olarak sunulmaktadır. Emeğini ve zamanını topluma bağışlayan gönüllüler için sevgiyle yapılmıştır.* ❤️
+*Bu proje MIT lisansı ile açık kaynaklı olarak sunulmaktadır. 
+Emeğini ve zamanını topluma bağışlayan gönüllüler için sevgiyle yapılmıştır.* ❤️
 
 ```
 
