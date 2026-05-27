@@ -34,6 +34,11 @@ Oyun deneyimini bir üst seviyeye taşımak için geliştirme aşamasında olan 
 **Yeni Arayüz Ekranları (Hamburger Menü):**
 - ❤️ **Destekle:** Projenin ücretsiz kalmasına katkıda bulunmak isteyenler için bağış kanalları.
 - 📝 **Changelog:** Sürüm notları ve güncellemeler.
+- Yolda giderken dinleyerek çalışma için
+* Ses dosyası halinde bir bölüm.
+* 114 surenin tamamını toplu olarak, hem sesli  hem de görsel /yazılı bir şekilde:
+a- Mushaftaki sıralamaya göre sayma
+b- Nüzûl sırasına göre sayma sistemi
 
 ---
 
